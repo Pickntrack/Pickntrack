@@ -5,11 +5,13 @@ exports.generateOtp = async () => {
   return OTP;
 };
 
-exports.createToken = async (userId) => {
+exports.createToken = async (userId, role) => {
+  console.log(userId, role);
   return jwt.sign(
     {
-      data: userId,
+      id: userId,
+      role,
     },
-    "PICKNTRACKAPP"
+    process.env.JWT_SECRET_KEY
   );
 };

@@ -55,7 +55,7 @@ exports.registerWithSocials = async (req, res) => {
 
     const otp = await generateOtp();
 
-    await User.findOneAndUpdate({ phone_number }, { otp: otp });
+    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
@@ -90,7 +90,7 @@ exports.login = async (req, res) => {
 
     const otp = await generateOtp();
 
-    await User.findOneAndUpdate({ phone_number }, { otp: otp });
+    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
@@ -120,7 +120,7 @@ exports.loginWithSocials = async (req, res) => {
 
     const otp = await generateOtp();
 
-    await User.findOneAndUpdate({ phone_number }, { otp });
+    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
@@ -160,7 +160,7 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    const token = await createToken(user.id);
+    const token = await createToken(user._id, user.role);
     await User.findOneAndUpdate({ phone_number }, { otp: null });
     return res.status(200).json({
       success: true,
@@ -194,7 +194,7 @@ exports.sendOtp = async (req, res) => {
     }
 
     const otp = await generateOtp();
-    await User.findOneAndUpdate({ phone_number }, { otp: otp });
+    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
     return res.status(200).json({
       success: true,
       data: "Otp sent",

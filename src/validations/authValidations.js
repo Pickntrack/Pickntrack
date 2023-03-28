@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 exports.registerValidation = (data) => {
-  const RegisterSchema = Joi.object({
+  const schema = Joi.object({
     full_name: Joi.string().min(2).max(255).required(),
     phone_number: Joi.string().min(10).max(10).required(),
     email: Joi.string().email().allow(null),
@@ -9,27 +9,27 @@ exports.registerValidation = (data) => {
     city: Joi.string().allow(null),
     pincode: Joi.number().allow(null),
   });
-  return RegisterSchema.validate(data);
+  return schema.validate(data);
 };
 
 exports.loginValidation = (data) => {
-  const LoginSchema = Joi.object({
+  const schema = Joi.object({
     phone_number: Joi.string().min(10).max(10).required(),
   });
-  return LoginSchema.validate(data);
+  return schema.validate(data);
 };
 
 exports.verifyOtpValidation = (data) => {
-  const VerifyOtpSchema = Joi.object({
+  const schema = Joi.object({
     phone_number: Joi.string().min(10).max(10).required(),
     otp: Joi.number().required(),
   });
-  return VerifyOtpSchema.validate(data);
+  return schema.validate(data);
 };
 
 exports.sendOtpValidation = (data) => {
-  const SendOtpSchema = Joi.object({
+  const schema = Joi.object({
     phone_number: Joi.string().min(10).max(10).required(),
   });
-  return SendOtpSchema.validate(data);
+  return schema.validate(data);
 };
