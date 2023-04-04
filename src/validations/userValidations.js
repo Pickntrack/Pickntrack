@@ -7,17 +7,11 @@ exports.updateUserValidation = (data) => {
     email: Joi.string().email().allow(null),
     city: Joi.string().allow(null),
     pincode: Joi.number().allow(null),
-  });
-  return schema.validate(data);
-};
-
-exports.createInquiryValidation = (data) => {
-  const schema = Joi.object({
-    aadhar_id: Joi.string().required(),
-    pick_up_location: Joi.string().required(),
-    drop_location: Joi.string().required(),
-    service_needed: Joi.string().required(),
-    service_needed: Joi.string().required(),
+    notification_settings: {
+      email_updates: Joi.boolean(),
+      whatsapp_updates: Joi.boolean(),
+      track_updates: Joi.boolean(),
+    },
   });
   return schema.validate(data);
 };

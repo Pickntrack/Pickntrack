@@ -4,7 +4,6 @@ const router = express.Router();
 const OrderController = require("../controllers/orderController");
 const { checkUserToken } = require("../middlewares/checkUserToken");
 
-router.post("/create-order", checkUserToken, OrderController.createOrder);
 router.get("/orders", checkUserToken, OrderController.orders);
 router.get("/order", checkUserToken, OrderController.order);
 router.get("/types", checkUserToken, OrderController.types);

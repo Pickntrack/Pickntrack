@@ -1,32 +1,8 @@
-const Order = require("../models/Order");
 const Type = require("../models/Type");
 const {
-  createOrderValidation,
   orderValidation,
   ordersValidation,
 } = require("../validations/orderValidations");
-
-exports.createOrder = async (req, res) => {
-  try {
-    const { error } = createOrderValidation(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-    await Order.create(req.body);
-    return res.status(200).json({
-      success: true,
-      data: "Order Create",
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 exports.orders = async (req, res) => {
   try {

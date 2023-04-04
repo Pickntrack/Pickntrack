@@ -12,11 +12,13 @@ app.use(cors());
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const orderRoute = require("./routes/orderRoute");
+const inquiryRoute = require("./routes/inquiryRoute");
 const uploadFile = require("./service/uploadFile");
 
 app.use("/api", authRoute);
 app.use("/api", userRoute);
 app.use("/api", orderRoute);
+app.use("/api", inquiryRoute);
 app.use("/api", uploadFile);
 
 app.listen(port, () => {

@@ -12,6 +12,20 @@ const UserSchema = new Schema(
     pincode: Number,
     otp: Number,
     role: { type: Number, default: 1 },
+    notification_settings: {
+      email_updates: {
+        type: Boolean,
+        default: true,
+      },
+      whatsapp_updates: {
+        type: Boolean,
+        default: true,
+      },
+      track_updates: {
+        type: Boolean,
+        default: true,
+      },
+    },
   },
   {
     timestamps: true,
