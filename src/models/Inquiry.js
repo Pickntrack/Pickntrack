@@ -14,6 +14,7 @@ const InquirySchema = new Schema(
     car_type: String,
     delivery_type: String,
     user_id: String,
+    items: {},
     whatsapp_updates: {
       type: Boolean,
       default: true,

@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const OrderController = require("../controllers/orderController");
-const { checkUserToken } = require("../middlewares/checkUserToken");
+const { checkCustomerToken } = require("../middlewares/checkToken");
 
-router.get("/orders", checkUserToken, OrderController.orders);
-router.get("/order", checkUserToken, OrderController.order);
-router.get("/types", checkUserToken, OrderController.types);
+router.get("/orders", checkCustomerToken, OrderController.orders);
+router.get("/order", checkCustomerToken, OrderController.order);
+router.get("/types", checkCustomerToken, OrderController.types);
+router.post("/make_payment", checkCustomerToken, OrderController.makePayment);
 
 module.exports = router;

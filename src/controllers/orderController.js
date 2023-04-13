@@ -2,7 +2,9 @@ const Type = require("../models/Type");
 const {
   orderValidation,
   ordersValidation,
+  makePaymentValidation,
 } = require("../validations/orderValidations");
+const { createOrder } = require("../service/razorpay");
 
 exports.orders = async (req, res) => {
   try {
@@ -70,6 +72,49 @@ exports.types = async (req, res) => {
       success: true,
       data: types,
     });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.makePayment = async (req, res) => {
+  try {
+    const { error } = makePaymentValidation(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    // const order = await Order.findByID({ _id: req.body.order_id });
+    // if (!order) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Order Not found",
+    //   });
+    // }
+
+    // if (order.payment_status === "RECEIVED") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Payment already done",
+    //   });
+    // }
+
+    const createOrderResponse = await createOrder(req.body.amount);
+    if (!createOrderResponse.success) {
+      return res.status(400).json({
+        success: false,
+        message: createOrderResponse.message,
+      });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, data: createOrderResponse.data });
   } catch (error) {
     return res.status(400).json({
       success: false,

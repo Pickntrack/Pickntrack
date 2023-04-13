@@ -50,6 +50,7 @@ exports.createInquiryValidation = (data) => {
         .required()
         .valid("Exclusive Container", "Shared Container", "Drive-N-Deliver"),
     }),
+    items: Joi.object(),
     whatsapp_updates: Joi.boolean().required(),
   });
   return schema.validate(data);

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const Customer = require("../models/Customer");
 
-exports.checkUserToken = async (req, res, next) => {
+exports.checkCustomerToken = async (req, res, next) => {
   try {
     const token = req.header("token");
     if (!token) {
@@ -13,7 +13,7 @@ exports.checkUserToken = async (req, res, next) => {
     const secretKey = process.env.JWT_SECRET_KEY;
     const verifyUser = jwt.verify(token, secretKey);
 
-    const user = await User.findById({ _id: verifyUser.id }).lean();
+    const user = await Customer.findById({ _id: verifyUser.id }).lean();
     if (!user) {
       return res.status(400).json({
         success: false,

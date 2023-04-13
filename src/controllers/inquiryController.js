@@ -1,5 +1,5 @@
 const Inquiry = require("../models/Inquiry");
-const User = require("../models/User");
+const Customer = require("../models/Customer");
 const {
   createInquiryValidation,
 } = require("../validations/InquiryValidations");
@@ -59,8 +59,8 @@ exports.inquiry = async (req, res) => {
         message: "Inquiry not found",
       });
     }
-    const user = await User.findById({ _id: inquiry.user_id });
-    if (!user) {
+    const customer = await Customer.findById({ _id: inquiry.user_id });
+    if (!customer) {
       return res.status(400).json({
         success: false,
         message: "User not found",
@@ -77,13 +77,13 @@ exports.inquiry = async (req, res) => {
         service_needed: inquiry.service_needed,
         whatsapp_updates: inquiry.whatsapp_updates,
         user: {
-          _id: user._id,
-          full_name: user.full_name,
-          phone_number: user.phone_number,
-          email: user?.email,
-          aadhar_id: user?.aadhar_id,
-          city: user?.city,
-          pincode: user?.pincode,
+          _id: customer._id,
+          full_name: customer.full_name,
+          phone_number: customer.phone_number,
+          email: customer?.email,
+          aadhar_id: customer?.aadhar_id,
+          city: customer?.city,
+          pincode: customer?.pincode,
         },
       },
     });

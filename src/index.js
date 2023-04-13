@@ -10,15 +10,17 @@ app.use(express.json());
 app.use(cors());
 
 const authRoute = require("./routes/authRoute");
-const userRoute = require("./routes/userRoute");
+const customerRoute = require("./routes/customerRoute");
 const orderRoute = require("./routes/orderRoute");
 const inquiryRoute = require("./routes/inquiryRoute");
+const webhookRoute = require("./routes/webhookRoute");
 const uploadFile = require("./service/uploadFile");
 
 app.use("/api", authRoute);
-app.use("/api", userRoute);
+app.use("/api", customerRoute);
 app.use("/api", orderRoute);
 app.use("/api", inquiryRoute);
+app.use("/webhook", webhookRoute);
 app.use("/api", uploadFile);
 
 app.listen(port, () => {

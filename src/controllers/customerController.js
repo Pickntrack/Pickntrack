@@ -1,7 +1,10 @@
-const User = require("../models/User");
-const { updateUserValidation } = require("../validations/userValidations");
+const Customer = require("../models/Customer");
+const {
+  updateUserValidation,
+  updateCustomerValidation,
+} = require("../validations/customerValidations");
 
-exports.user = async (req, res) => {
+exports.customer = async (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res.status(400).json({
@@ -10,8 +13,8 @@ exports.user = async (req, res) => {
     });
   }
   try {
-    const user = await User.findById({ _id: id }).lean();
-    if (!user) {
+    const customer = await Customer.findById({ _id: id }).lean();
+    if (!customer) {
       return res.status(400).json({
         success: false,
         message: "User not found",
@@ -19,7 +22,7 @@ exports.user = async (req, res) => {
     }
     return res.status(200).json({
       success: true,
-      data: user,
+      data: customer,
     });
   } catch (error) {
     return res.status(400).json({
@@ -29,7 +32,7 @@ exports.user = async (req, res) => {
   }
 };
 
-exports.updateUser = async (req, res) => {
+exports.updateCustomer = async (req, res) => {
   const { id } = req.query;
   if (!id) {
     return res.status(400).json({
@@ -37,7 +40,7 @@ exports.updateUser = async (req, res) => {
       message: "Please provide id",
     });
   }
-  const { error } = updateUserValidation(req.body);
+  const { error } = updateCustomerValidation(req.body);
   if (error) {
     return res.status(400).json({
       success: false,
@@ -45,7 +48,7 @@ exports.updateUser = async (req, res) => {
     });
   }
   try {
-    await User.findByIdAndUpdate({ _id: id }, req.body);
+    await Customer.findByIdAndUpdate({ _id: id }, req.body);
     return res.status(200).json({
       success: true,
       data: "User updated",
@@ -68,7 +71,7 @@ exports.deleteAccount = async (req, res) => {
   }
 
   try {
-    await User.findByIdAndDelete({ _id: id });
+    await Customer.findByIdAndDelete({ _id: id });
     return res.status(200).json({
       success: true,
       data: "Account deleted",

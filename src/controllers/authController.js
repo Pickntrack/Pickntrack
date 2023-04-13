@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const Customer = require("../models/Customer");
 const { generateOtp, createToken } = require("../helpers/functions");
 const {
   registerValidation,
@@ -6,6 +6,7 @@ const {
   verifyOtpValidation,
   sendOtpValidation,
 } = require("../validations/authValidations");
+const sendSMS = require("../service/sendSms");
 
 exports.register = async (req, res) => {
   const { error } = registerValidation(req.body);
@@ -18,14 +19,14 @@ exports.register = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await User.findOne({ phone_number }).lean();
+    const user = await Customer.findOne({ phone_number }).lean();
     if (user) {
       return res.status(400).json({
         success: false,
         message: "User already exist",
       });
     }
-    await User.create(req.body);
+    await Customer.create(req.body);
 
     return res.status(200).json({
       success: true,
@@ -50,12 +51,12 @@ exports.registerWithSocials = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await User.findOne({ phone_number }).lean();
-    if (!user) await User.create(req.body);
+    const user = await Customer.findOne({ phone_number }).lean();
+    if (!user) await Customer.create(req.body);
 
     const otp = await generateOtp();
 
-    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
+    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
@@ -80,7 +81,7 @@ exports.login = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await User.findOne({ phone_number }).lean();
+    const user = await Customer.findOne({ phone_number }).lean();
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -90,7 +91,15 @@ exports.login = async (req, res) => {
 
     const otp = await generateOtp();
 
-    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse.return) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
@@ -115,12 +124,20 @@ exports.loginWithSocials = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await User.findOne({ phone_number }).lean();
-    if (!user) await User.create(req.body);
+    const user = await Customer.findOne({ phone_number }).lean();
+    if (!user) await Customer.create(req.body);
 
     const otp = await generateOtp();
 
-    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse.return) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
@@ -145,7 +162,7 @@ exports.verifyOtp = async (req, res) => {
 
   const { phone_number, otp } = req.body;
   try {
-    const user = await User.findOne({ phone_number }).lean();
+    const user = await Customer.findOne({ phone_number }).lean();
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -161,7 +178,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     const token = await createToken(user._id, user.role);
-    await User.findOneAndUpdate({ phone_number }, { otp: null });
+    await Customer.findOneAndUpdate({ phone_number }, { otp: null });
     return res.status(200).json({
       success: true,
       data: { ...user, token },
@@ -185,7 +202,7 @@ exports.sendOtp = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await User.findOne({ phone_number }).lean();
+    const user = await Customer.findOne({ phone_number }).lean();
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -194,7 +211,16 @@ exports.sendOtp = async (req, res) => {
     }
 
     const otp = await generateOtp();
-    await User.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
+
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse.return) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
     return res.status(200).json({
       success: true,
       data: "Otp sent",
