@@ -76,6 +76,7 @@ exports.inquiry = async (req, res) => {
         drop_location: inquiry.drop_location,
         service_needed: inquiry.service_needed,
         whatsapp_updates: inquiry.whatsapp_updates,
+        items: inquiry.items,
         user: {
           _id: customer._id,
           full_name: customer.full_name,

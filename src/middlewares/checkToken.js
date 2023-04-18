@@ -14,22 +14,15 @@ exports.checkCustomerToken = async (req, res, next) => {
     const verifyUser = jwt.verify(token, secretKey);
 
     const user = await Customer.findById({ _id: verifyUser.id }).lean();
-    if (!user) {
+    if (!user || user?.role == 1) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Unauthorized",
       });
     }
 
-    if (user.role == 1) {
-      req.user = user;
-      next();
-    } else {
-      return res.status(400).json({
-        error: "Unauthorized",
-        success: false,
-      });
-    }
+    req.user = user;
+    next();
   } catch (error) {
     return res.status(400).json({
       error: error.message,

@@ -3,11 +3,22 @@ const router = express.Router();
 
 const AuthController = require("../controllers/authController");
 
-router.post("/register", AuthController.register);
-router.post("/register-with-socials", AuthController.registerWithSocials);
-router.post("/login", AuthController.login);
-router.post("/login-with-socials", AuthController.loginWithSocials);
-router.post("/verify-otp", AuthController.verifyOtp);
-router.post("/send-otp", AuthController.sendOtp);
+router.post("/customer/register", AuthController.customerRegister);
+router.post(
+  "/customer/register-or-login-with-socials",
+  AuthController.customerRegisterOrLoginWithSocials
+);
+router.post("/customer/login", AuthController.customerLogin);
+
+router.post("/customer/verify-otp", AuthController.customerVerifyOtp);
+router.post("/customer/send-otp", AuthController.customerSendOtp);
+
+router.post("/member/register", AuthController.memberRegister);
+router.post(
+  "/member/register-or-login-with-socials",
+  AuthController.memberRegisterOrLoginWithSocials
+);
+router.post("/member/login", AuthController.memberLogin);
+router.post("/member/verify-otp", AuthController.memberVerifyOtp);
 
 module.exports = router;

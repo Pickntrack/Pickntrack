@@ -4,6 +4,8 @@ const Schema = mongoose.Schema;
 
 const CustomerSchema = new Schema(
   {
+    id: String,
+    token: String,
     full_name: String,
     phone_number: String,
     email: String,
@@ -25,6 +27,10 @@ const CustomerSchema = new Schema(
         type: Boolean,
         default: true,
       },
+    },
+    registration_type: {
+      type: String,
+      default: "NORMAL",
     },
   },
   {
