@@ -5,6 +5,13 @@ const AuthController = require("../controllers/authController");
 
 router.post("/customer/register", AuthController.customerRegister);
 router.post(
+  "/customer/add-additional-information",
+  AuthController.customerAddAdditionalInformation
+);
+
+router.post("/customer/verify-email", AuthController.customerVerifyEmail);
+
+router.post(
   "/customer/register-or-login-with-socials",
   AuthController.customerRegisterOrLoginWithSocials
 );

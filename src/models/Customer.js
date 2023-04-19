@@ -13,6 +13,8 @@ const CustomerSchema = new Schema(
     city: String,
     pincode: Number,
     otp: Number,
+    email_otp: Number,
+    is_email_verified: { type: Boolean, default: false },
     role: { type: Number, default: 1 },
     notification_settings: {
       email_updates: {

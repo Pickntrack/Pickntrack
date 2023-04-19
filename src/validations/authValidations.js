@@ -4,10 +4,16 @@ exports.customerRegisterValidation = (data) => {
   const schema = Joi.object({
     full_name: Joi.string().required(),
     phone_number: Joi.string().min(10).max(10).required(),
-    email: Joi.string().email().allow(null),
-    aadhar_id: Joi.string().length(12).allow(null),
-    city: Joi.string().allow(null),
-    pincode: Joi.number().allow(null),
+  });
+  return schema.validate(data);
+};
+
+exports.customerAddAditionalInfoValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    aadhar_id: Joi.string().length(12).required(),
+    city: Joi.string().required(),
+    pincode: Joi.number().required(),
   });
   return schema.validate(data);
 };
@@ -33,6 +39,13 @@ exports.customerLoginValidation = (data) => {
 exports.customerVerifyOtpValidation = (data) => {
   const schema = Joi.object({
     phone_number: Joi.string().min(10).max(10).required(),
+    otp: Joi.number().required(),
+  });
+  return schema.validate(data);
+};
+
+exports.customerVerifyEmailValidation = (data) => {
+  const schema = Joi.object({
     otp: Joi.number().required(),
   });
   return schema.validate(data);
