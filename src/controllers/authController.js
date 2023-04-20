@@ -4,13 +4,16 @@ const {
   customerAddAditionalInfoValidation,
   customerLoginValidation,
   customerVerifyOtpValidation,
-  customerSendOtpValidation,
   memberRegisterValidation,
   memberLoginValidation,
   memberVerifyOtpValidation,
   customerRegisterOrLoginWithSocialValidation,
   memberRegisterOrLoginWithSocialValidation,
   customerVerifyEmailValidation,
+  memberAddAditionalInfoValidation,
+  memberVerifyEmailValidation,
+  customerResendOtpValidation,
+  memberResendOtpValidation,
 } = require("../validations/authValidations");
 const Customer = require("../models/Customer");
 const Member = require("../models/Member");
@@ -49,6 +52,146 @@ exports.customerRegister = async (req, res) => {
 
     await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
+    return res.status(200).json({
+      success: true,
+      data: "Otp sent",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.customerLogin = async (req, res) => {
+  const { error } = customerLoginValidation(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  const { phone_number } = req.body;
+  try {
+    const user = await Customer.findOne({ phone_number }).lean();
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = await generateOtp();
+
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
+
+    return res.status(200).json({
+      success: true,
+      data: "Otp sent",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.customerVerifyOtp = async (req, res) => {
+  const { type } = req.query;
+  if (!type) {
+    return res.status(400).json({
+      success: false,
+      message: "Type is required",
+    });
+  }
+
+  const { error } = customerVerifyOtpValidation(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  const { phone_number, otp } = req.body;
+  try {
+    const user = await Customer.findOne({ phone_number }).lean();
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(200).json({
+        success: true,
+        message: "Otp didn't match",
+      });
+    }
+    await Customer.findOneAndUpdate({ phone_number }, { otp: null });
+
+    if (type === "register") {
+      return res.status(200).json({
+        success: true,
+        data: "OTP Verified",
+      });
+    } else if (type === "login") {
+      const token = await createToken(user._id, user.role);
+      return res.status(200).json({
+        success: true,
+        data: { ...user, token },
+      });
+    }
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.customerResendOtp = async (req, res) => {
+  const { error } = customerResendOtpValidation(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  const { phone_number } = req.body;
+  try {
+    const user = await Customer.findOne({ phone_number }).lean();
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = await generateOtp();
+
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse.return) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
     return res.status(200).json({
       success: true,
       data: "Otp sent",
@@ -198,146 +341,6 @@ exports.customerRegisterOrLoginWithSocials = async (req, res) => {
   }
 };
 
-exports.customerLogin = async (req, res) => {
-  const { error } = customerLoginValidation(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-
-  const { phone_number } = req.body;
-  try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const otp = await generateOtp();
-
-    const sendSMSResponse = await sendSMS(phone_number, otp);
-    if (!sendSMSResponse) {
-      return res.status(400).json({
-        success: false,
-        message: "Something went wrong",
-      });
-    }
-
-    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
-
-    return res.status(200).json({
-      success: true,
-      data: "Otp sent",
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-exports.customerVerifyOtp = async (req, res) => {
-  const { type } = req.query;
-  if (!type) {
-    return res.status(400).json({
-      success: false,
-      message: "Type is required",
-    });
-  }
-
-  const { error } = customerVerifyOtpValidation(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-
-  const { phone_number, otp } = req.body;
-  try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    if (user.otp !== otp) {
-      return res.status(200).json({
-        success: true,
-        message: "Otp didn't match",
-      });
-    }
-    await Customer.findOneAndUpdate({ phone_number }, { otp: null });
-
-    if (type === "register") {
-      return res.status(200).json({
-        success: true,
-        data: "OTP Verified",
-      });
-    } else if (type === "login") {
-      const token = await createToken(user._id, user.role);
-      return res.status(200).json({
-        success: true,
-        data: { ...user, token },
-      });
-    }
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-exports.customerSendOtp = async (req, res) => {
-  const { error } = customerSendOtpValidation(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-
-  const { phone_number } = req.body;
-  try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const otp = await generateOtp();
-
-    const sendSMSResponse = await sendSMS(phone_number, otp);
-    if (!sendSMSResponse.return) {
-      return res.status(400).json({
-        success: false,
-        message: "Something went wrong",
-      });
-    }
-
-    await Customer.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
-    return res.status(200).json({
-      success: true,
-      data: "Otp sent",
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
 exports.memberRegister = async (req, res) => {
   const { error } = memberRegisterValidation(req.body);
   if (error) {
@@ -358,37 +361,21 @@ exports.memberRegister = async (req, res) => {
     }
     await Member.create(req.body);
 
-    return res.status(200).json({
-      success: true,
-      data: "Record inserted",
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+    const otp = await generateOtp();
 
-exports.memberRegisterOrLoginWithSocials = async (req, res) => {
-  const { error } = memberRegisterOrLoginWithSocialValidation(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse.return) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
 
-  const { token } = req.body;
-  try {
-    let user = await Member.findOne({ token }).lean();
-    if (!user) user = await Member.create(req.body);
-
-    const jsonToken = await createToken(user._id, user.role);
+    await Member.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
 
     return res.status(200).json({
       success: true,
-      data: jsonToken,
+      data: "Otp sent",
     });
   } catch (error) {
     return res.status(400).json({
@@ -442,6 +429,14 @@ exports.memberLogin = async (req, res) => {
 };
 
 exports.memberVerifyOtp = async (req, res) => {
+  const { type } = req.query;
+  if (!type) {
+    return res.status(400).json({
+      success: false,
+      message: "Type is required",
+    });
+  }
+
   const { error } = memberVerifyOtpValidation(req.body);
   if (error) {
     return res.status(400).json({
@@ -467,11 +462,204 @@ exports.memberVerifyOtp = async (req, res) => {
       });
     }
 
-    const token = await createToken(user._id, user.role);
     await Member.findOneAndUpdate({ phone_number }, { otp: null });
+
+    if (type === "register") {
+      return res.status(200).json({
+        success: true,
+        data: "OTP Verified",
+      });
+    } else if (type === "login") {
+      const token = await createToken(user._id, user.role);
+      return res.status(200).json({
+        success: true,
+        data: { ...user, token },
+      });
+    }
+
     return res.status(200).json({
       success: true,
       data: { ...user, token },
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.memberResendOtp = async (req, res) => {
+  const { error } = memberResendOtpValidation(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  const { phone_number } = req.body;
+  try {
+    const user = await Member.findOne({ phone_number }).lean();
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = await generateOtp();
+
+    const sendSMSResponse = await sendSMS(phone_number, otp);
+    if (!sendSMSResponse.return) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Member.findOneAndUpdate({ phone_number }, { otp: Number(otp) });
+    return res.status(200).json({
+      success: true,
+      data: "Otp sent",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.memberAddAdditionalInformation = async (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Id is required",
+    });
+  }
+
+  try {
+    const user = await Member.findById({ _id: user_id }).lean();
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const { error } = memberAddAditionalInfoValidation(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    const { email } = req.body;
+
+    const otp = await generateOtp();
+
+    const sendEmailResponse = await sendEmail(email, otp);
+    if (!sendEmailResponse.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    await Member.findByIdAndUpdate(
+      { _id: user_id },
+      { email_otp: Number(otp), ...req.body }
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: "Email sent",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.memberVerifyEmail = async (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Id is required",
+    });
+  }
+
+  try {
+    const user = await Member.findById({ _id: user_id }).lean();
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const { error } = memberVerifyEmailValidation(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    const { otp } = req.body;
+
+    if (user.email_otp !== otp) {
+      return res.status(200).json({
+        success: true,
+        message: "Otp didn't match",
+      });
+    }
+
+    await Member.findByIdAndUpdate(
+      { _id: user_id },
+      { email_otp: null, is_email_verified: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: "Email verified",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.memberRegisterOrLoginWithSocials = async (req, res) => {
+  const { error } = memberRegisterOrLoginWithSocialValidation(req.body);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  const { token } = req.body;
+  try {
+    let user = await Member.findOne({ token }).lean();
+    if (!user) user = await Member.create(req.body);
+
+    const jsonToken = await createToken(user._id, user.role);
+
+    return res.status(200).json({
+      success: true,
+      data: jsonToken,
     });
   } catch (error) {
     return res.status(400).json({
