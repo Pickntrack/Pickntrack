@@ -3,13 +3,9 @@ const app = express();
 require("dotenv").config();
 const { databaseConnection } = require("./database/connection");
 const cors = require("cors");
-const ejs = require("ejs");
 const path = require("path");
 
 const port = process.env.PORT;
-
-app.set("view engine", "ejs");
-app.set("views", "./views");
 
 app.use(express.json());
 app.use(cors());
