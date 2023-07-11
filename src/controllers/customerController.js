@@ -1,23 +1,17 @@
 const Customer = require("../models/Customer");
 const {
-  updateUserValidation,
   updateCustomerValidation,
 } = require("../validations/customerValidations");
 
 exports.customer = async (req, res) => {
-  const { id } = req.query;
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide id",
-    });
-  }
+  const { id } = req.user;
+
   try {
     const customer = await Customer.findById({ _id: id }).lean();
     if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
     return res.status(200).json({
@@ -33,13 +27,8 @@ exports.customer = async (req, res) => {
 };
 
 exports.updateCustomer = async (req, res) => {
-  const { id } = req.query;
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide id",
-    });
-  }
+  const { id } = req.user;
+
   const { error } = updateCustomerValidation(req.body);
   if (error) {
     return res.status(400).json({
@@ -51,7 +40,7 @@ exports.updateCustomer = async (req, res) => {
     await Customer.findByIdAndUpdate({ _id: id }, req.body);
     return res.status(200).json({
       success: true,
-      data: "User updated",
+      data: "Customer updated",
     });
   } catch (error) {
     return res.status(400).json({
@@ -62,19 +51,13 @@ exports.updateCustomer = async (req, res) => {
 };
 
 exports.deleteAccount = async (req, res) => {
-  const { id } = req.query;
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide id",
-    });
-  }
+  const { id } = req.user;
 
   try {
     await Customer.findByIdAndDelete({ _id: id });
     return res.status(200).json({
       success: true,
-      data: "Account deleted",
+      data: "Customer account deleted",
     });
   } catch (error) {
     return res.status(400).json({

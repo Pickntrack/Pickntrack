@@ -5,11 +5,10 @@ exports.generateOtp = async () => {
   return OTP;
 };
 
-exports.createToken = async (userId, role) => {
-  console.log(userId, role);
+exports.createToken = async (id, role) => {
   return jwt.sign(
     {
-      id: userId,
+      id,
       role,
     },
     process.env.JWT_SECRET_KEY

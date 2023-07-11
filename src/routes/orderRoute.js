@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const OrderController = require("../controllers/orderController");
-const { checkCustomerToken } = require("../middlewares/checkToken");
+const { checkCustomerToken } = require("../middlewares/checkTokens");
 
 router.get("/orders", checkCustomerToken, OrderController.orders);
 router.get("/order", checkCustomerToken, OrderController.order);

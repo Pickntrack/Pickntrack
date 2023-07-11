@@ -2,8 +2,8 @@ const Joi = require("joi");
 
 exports.updateCustomerValidation = (data) => {
   const schema = Joi.object({
-    full_name: Joi.string().min(2).max(255).required(),
-    phone_number: Joi.string().min(10).max(10).required(),
+    full_name: Joi.string().min(2).max(255),
+    phone_number: Joi.string().min(10).max(10),
     email: Joi.string().email().allow(null),
     city: Joi.string().allow(null),
     pincode: Joi.number().allow(null),

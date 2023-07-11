@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const CustomerController = require("../controllers/customerController");
-const { checkCustomerToken } = require("../middlewares/checkToken");
+const { checkCustomerToken } = require("../middlewares/checkTokens");
 
 router.get("/customer", checkCustomerToken, CustomerController.customer);
 router.post(
-  "/update-customer",
+  "/customer/update-customer",
   checkCustomerToken,
   CustomerController.updateCustomer
 );
 router.post(
-  "/delete-account",
+  "/customer/delete-account",
   checkCustomerToken,
   CustomerController.deleteAccount
 );

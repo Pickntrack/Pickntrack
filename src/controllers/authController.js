@@ -31,11 +31,11 @@ exports.customerRegister = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (user) {
+    const customer = await Customer.findOne({ phone_number }).lean();
+    if (customer) {
       return res.status(400).json({
         success: false,
-        message: "User already exist",
+        message: "Customer already exist",
       });
     }
     await Customer.create(req.body);
@@ -75,11 +75,11 @@ exports.customerLogin = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (!user) {
+    const customer = await Customer.findOne({ phone_number }).lean();
+    if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
 
@@ -126,15 +126,15 @@ exports.customerVerifyOtp = async (req, res) => {
 
   const { phone_number, otp } = req.body;
   try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (!user) {
+    const customer = await Customer.findOne({ phone_number }).lean();
+    if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
 
-    if (user.otp !== otp) {
+    if (customer.otp !== otp) {
       return res.status(200).json({
         success: true,
         message: "Otp didn't match",
@@ -148,10 +148,10 @@ exports.customerVerifyOtp = async (req, res) => {
         data: "OTP Verified",
       });
     } else if (type === "login") {
-      const token = await createToken(user._id, user.role);
+      const token = await createToken(customer._id, customer.role);
       return res.status(200).json({
         success: true,
-        data: { ...user, token },
+        data: { ...customer, token },
       });
     }
   } catch (error) {
@@ -173,11 +173,11 @@ exports.customerResendOtp = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await Customer.findOne({ phone_number }).lean();
-    if (!user) {
+    const customer = await Customer.findOne({ phone_number }).lean();
+    if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
 
@@ -205,21 +205,21 @@ exports.customerResendOtp = async (req, res) => {
 };
 
 exports.customerAddAdditionalInformation = async (req, res) => {
-  const { user_id } = req.query;
+  const { customer_id } = req.query;
 
-  if (!user_id) {
+  if (!customer_id) {
     return res.status(400).json({
       success: false,
-      message: "Id is required",
+      message: "customer_id is required",
     });
   }
 
   try {
-    const user = await Customer.findById({ _id: user_id }).lean();
-    if (!user) {
+    const customer = await Customer.findById({ _id: customer_id }).lean();
+    if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
 
@@ -244,7 +244,7 @@ exports.customerAddAdditionalInformation = async (req, res) => {
     }
 
     await Customer.findByIdAndUpdate(
-      { _id: user_id },
+      { _id: customer_id },
       { email_otp: Number(otp) }
     );
 
@@ -261,21 +261,21 @@ exports.customerAddAdditionalInformation = async (req, res) => {
 };
 
 exports.customerVerifyEmail = async (req, res) => {
-  const { user_id } = req.query;
+  const { customer_id } = req.query;
 
-  if (!user_id) {
+  if (!customer_id) {
     return res.status(400).json({
       success: false,
-      message: "Id is required",
+      message: "customer_id is required",
     });
   }
 
   try {
-    const user = await Customer.findById({ _id: user_id }).lean();
-    if (!user) {
+    const customer = await Customer.findById({ _id: customer_id }).lean();
+    if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
 
@@ -289,7 +289,7 @@ exports.customerVerifyEmail = async (req, res) => {
 
     const { otp } = req.body;
 
-    if (user.email_otp !== otp) {
+    if (customer.email_otp !== otp) {
       return res.status(200).json({
         success: true,
         message: "Otp didn't match",
@@ -297,7 +297,7 @@ exports.customerVerifyEmail = async (req, res) => {
     }
 
     await Customer.findByIdAndUpdate(
-      { _id: user_id },
+      { _id: customer_id },
       { email_otp: null, is_email_verified: true }
     );
 
@@ -324,10 +324,10 @@ exports.customerRegisterOrLoginWithSocials = async (req, res) => {
 
   const { token } = req.body;
   try {
-    let user = await Customer.findOne({ token }).lean();
-    if (!user) user = await Customer.create(req.body);
+    let customer = await Customer.findOne({ token }).lean();
+    if (!customer) customer = await Customer.create(req.body);
 
-    const jsonToken = await createToken(user._id, user.role);
+    const jsonToken = await createToken(customer._id, customer.role);
 
     return res.status(200).json({
       success: true,
@@ -352,13 +352,14 @@ exports.memberRegister = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await Member.findOne({ phone_number }).lean();
-    if (user) {
+    const member = await Member.findOne({ phone_number }).lean();
+    if (member) {
       return res.status(400).json({
         success: false,
-        message: "User already exist",
+        message: "Member already exist",
       });
     }
+
     await Member.create(req.body);
 
     const otp = await generateOtp();
@@ -396,11 +397,11 @@ exports.memberLogin = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await Member.findOne({ phone_number }).lean();
-    if (!user) {
+    const member = await Member.findOne({ phone_number }).lean();
+    if (!member) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Member not found",
       });
     }
 
@@ -447,15 +448,15 @@ exports.memberVerifyOtp = async (req, res) => {
 
   const { phone_number, otp } = req.body;
   try {
-    const user = await Member.findOne({ phone_number }).lean();
-    if (!user) {
+    const member = await Member.findOne({ phone_number }).lean();
+    if (!member) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Member not found",
       });
     }
 
-    if (user.otp !== otp) {
+    if (member.otp !== otp) {
       return res.status(200).json({
         success: true,
         message: "Otp didn't match",
@@ -470,16 +471,16 @@ exports.memberVerifyOtp = async (req, res) => {
         data: "OTP Verified",
       });
     } else if (type === "login") {
-      const token = await createToken(user._id, user.role);
+      const token = await createToken(member._id, member.role);
       return res.status(200).json({
         success: true,
-        data: { ...user, token },
+        data: { ...member, token },
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: { ...user, token },
+      data: { ...member, token },
     });
   } catch (error) {
     return res.status(400).json({
@@ -500,11 +501,11 @@ exports.memberResendOtp = async (req, res) => {
 
   const { phone_number } = req.body;
   try {
-    const user = await Member.findOne({ phone_number }).lean();
-    if (!user) {
+    const member = await Member.findOne({ phone_number }).lean();
+    if (!member) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Member not found",
       });
     }
 
@@ -532,21 +533,21 @@ exports.memberResendOtp = async (req, res) => {
 };
 
 exports.memberAddAdditionalInformation = async (req, res) => {
-  const { user_id } = req.query;
+  const { member_id } = req.query;
 
-  if (!user_id) {
+  if (!member_id) {
     return res.status(400).json({
       success: false,
-      message: "Id is required",
+      message: "member_id is required",
     });
   }
 
   try {
-    const user = await Member.findById({ _id: user_id }).lean();
-    if (!user) {
+    const member = await Member.findById({ _id: member_id }).lean();
+    if (!member) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Member not found",
       });
     }
 
@@ -571,7 +572,7 @@ exports.memberAddAdditionalInformation = async (req, res) => {
     }
 
     await Member.findByIdAndUpdate(
-      { _id: user_id },
+      { _id: member_id },
       { email_otp: Number(otp), ...req.body }
     );
 
@@ -589,21 +590,21 @@ exports.memberAddAdditionalInformation = async (req, res) => {
 };
 
 exports.memberVerifyEmail = async (req, res) => {
-  const { user_id } = req.query;
+  const { member_id } = req.query;
 
-  if (!user_id) {
+  if (!member_id) {
     return res.status(400).json({
       success: false,
-      message: "Id is required",
+      message: "member_id is required",
     });
   }
 
   try {
-    const user = await Member.findById({ _id: user_id }).lean();
-    if (!user) {
+    const member = await Member.findById({ _id: member_id }).lean();
+    if (!member_id) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Member not found",
       });
     }
 
@@ -617,7 +618,7 @@ exports.memberVerifyEmail = async (req, res) => {
 
     const { otp } = req.body;
 
-    if (user.email_otp !== otp) {
+    if (member.email_otp !== otp) {
       return res.status(200).json({
         success: true,
         message: "Otp didn't match",
@@ -625,7 +626,7 @@ exports.memberVerifyEmail = async (req, res) => {
     }
 
     await Member.findByIdAndUpdate(
-      { _id: user_id },
+      { _id: member_id },
       { email_otp: null, is_email_verified: true }
     );
 
@@ -652,10 +653,10 @@ exports.memberRegisterOrLoginWithSocials = async (req, res) => {
 
   const { token } = req.body;
   try {
-    let user = await Member.findOne({ token }).lean();
-    if (!user) user = await Member.create(req.body);
+    let member = await Member.findOne({ token }).lean();
+    if (!member) member = await Member.create(req.body);
 
-    const jsonToken = await createToken(user._id, user.role);
+    const jsonToken = await createToken(member._id, member.role);
 
     return res.status(200).json({
       success: true,

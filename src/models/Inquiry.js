@@ -13,7 +13,8 @@ const InquirySchema = new Schema(
     quantity: Number,
     car_type: String,
     delivery_type: String,
-    user_id: String,
+    member_id: String,
+    customer_id: String,
     items: {},
     whatsapp_updates: {
       type: Boolean,

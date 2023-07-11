@@ -14,7 +14,10 @@ exports.createInquiry = async (req, res) => {
   }
 
   try {
-    await Inquiry.create({ ...req.body, user_id: req.user._id });
+    await Inquiry.create({
+      ...req.body,
+      customer_id: req.user.id,
+    });
     return res.status(200).json({
       success: true,
       data: "Inquiry created",
@@ -27,9 +30,11 @@ exports.createInquiry = async (req, res) => {
   }
 };
 
-exports.inquiries = async (req, res) => {
+exports.inquiriesOfCustomer = async (req, res) => {
+  const { id } = req.user;
+
   try {
-    const inquiries = await Inquiry.find({});
+    const inquiries = await Inquiry.find({ customer_id: id });
     return res.status(200).json({
       success: true,
       data: inquiries,
@@ -59,11 +64,11 @@ exports.inquiry = async (req, res) => {
         message: "Inquiry not found",
       });
     }
-    const customer = await Customer.findById({ _id: inquiry.user_id });
+    const customer = await Customer.findById({ _id: inquiry.customer_id });
     if (!customer) {
       return res.status(400).json({
         success: false,
-        message: "User not found",
+        message: "Customer not found",
       });
     }
 
@@ -77,14 +82,11 @@ exports.inquiry = async (req, res) => {
         service_needed: inquiry.service_needed,
         whatsapp_updates: inquiry.whatsapp_updates,
         items: inquiry.items,
-        user: {
-          _id: customer._id,
+        customer: {
           full_name: customer.full_name,
           phone_number: customer.phone_number,
           email: customer?.email,
           aadhar_id: customer?.aadhar_id,
-          city: customer?.city,
-          pincode: customer?.pincode,
         },
       },
     });
