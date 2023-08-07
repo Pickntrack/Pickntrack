@@ -4,7 +4,7 @@ const {
 } = require("../validations/customerValidations");
 
 exports.customer = async (req, res) => {
-  const { id } = req.user;
+  const { id } = req.query;
 
   try {
     const customer = await Customer.findById({ _id: id }).lean();
@@ -51,7 +51,7 @@ exports.updateCustomer = async (req, res) => {
 };
 
 exports.deleteAccount = async (req, res) => {
-  const { id } = req.user;
+  const { id } = req.query;
 
   try {
     await Customer.findByIdAndDelete({ _id: id });

@@ -26,7 +26,9 @@ app.use("/api", orderRoute);
 app.use("/api", inquiryRoute);
 app.use("/api", uploadFile);
 app.use("/webhook", webhookRoute);
-
+app.get("/",(req,res)=>{
+  res.send("Welcome to the app of pickntrack")
+})
 app.listen(port, () => {
   databaseConnection();
   console.log(`Server running on port ${port}`);
