@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-
+const DATABASE_URL = 'mongodb+srv://apppicknt:pickntrack2023@cluster0.rrtakhl.mongodb.net/test'
 const databaseConnection = () => {
   mongoose
-    .connect(process.env.DATABASE_URL, {
+    .connect(DATABASE_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })

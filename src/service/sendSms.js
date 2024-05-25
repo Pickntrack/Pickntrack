@@ -1,5 +1,5 @@
 const fast2sms = require("fast-two-sms");
-const apiKey = process.env.FAST_TO_SMS_API_KEY;
+const apiKey = 'iKM8ygkqlnNHcxw3d2r4RW60IsD1QoXJOFE95ZSeA7bVahUjTLR8L21mv3iBsOIoTcUk9qldx5hPgGNV'
 
 const sendSMS = async (phone, otp) => {
   const options = {
